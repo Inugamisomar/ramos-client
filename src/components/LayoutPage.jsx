@@ -1,15 +1,17 @@
 import { Outlet } from 'react-router-dom';
 import NavBar from './NavBar';
 
-const Layout = () => {
+const LayoutPage = () => {
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900">
+    <div className="min-h-screen bg-zinc-100 font-sans">
       <NavBar />
-      <main className="mx-auto max-w-6xl pt-24 pb-12">
+      
+      {/* Add pt-24 here to push everything down below the fixed Navbar */}
+      <main className="mx-auto max-w-7xl pt-24"> 
         <Outlet />
       </main>
     </div>
   );
 };
 
-export default Layout;
+export default LayoutPage;

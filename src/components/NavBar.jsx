@@ -5,8 +5,8 @@ const links = [
   { label: 'Home', to: '/' },
   { label: 'About', to: '/about' },
   { label: 'Articles', to: '/articles' },
+  
 ];
-
 const navLinkClassName = ({ isActive }) => [
   'rounded-full px-5 py-2 text-[12px] font-bold uppercase tracking-[0.2em] transition-all duration-300',
   isActive

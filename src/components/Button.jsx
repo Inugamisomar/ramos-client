@@ -1,33 +1,21 @@
 import { Link } from 'react-router-dom';
 
-const variantClasses = {
-  primary: 'bg-zinc-900 text-zinc-50 hover:bg-zinc-700',
-  secondary: 'bg-zinc-50 text-zinc-900 hover:bg-zinc-200',
-};
-
-const Button = ({
-  children,
-  to,
-  type = 'button',
-  variant = 'secondary',
-  className = '',
-}) => {
-  const classes = [
-    'inline-flex items-center justify-center rounded-full border-2 border-zinc-900 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] transition',
-    variantClasses[variant] ?? variantClasses.secondary,
-    className,
-  ].join(' ').trim();
-
+const Button = ({ children, to, className = '', ...props }) => {
+  // Shared Tailwind classes for the button look
+  const baseStyle = "inline-block rounded-full border-2 border-zinc-900 px-6 py-2 text-xs font-bold uppercase tracking-[0.15em] text-zinc-900 transition-colors hover:bg-zinc-900 hover:text-zinc-50";
+  
+  // If a 'to' prop is passed, render a React Router Link
   if (to) {
     return (
-      <Link to={to} className={classes}>
+      <Link to={to} className={`${baseStyle} ${className}`} {...props}>
         {children}
       </Link>
     );
   }
-
+  
+  // Otherwise, render a standard HTML button
   return (
-    <button type={type} className={classes}>
+    <button className={`${baseStyle} ${className}`} {...props}>
       {children}
     </button>
   );

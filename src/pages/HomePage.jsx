@@ -1,5 +1,4 @@
 import Button from '../components/Button';
-
 const HomePage = () => {
   return (
     <div className="flex w-full flex-col gap-6">
