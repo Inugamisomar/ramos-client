@@ -12,7 +12,7 @@ const articles = [
       'First, we need to dive into your NVIDIA...',
       'Next, we will look at Windows Game Mode...'
     ],
-    image: hardwareImg   // ✅ FIXED
+    image: hardwareImg  
   },
   {
     name: 'next-gen-console-war',
@@ -22,7 +22,7 @@ const articles = [
       'Leaked developer documents...',
       'But the real wildcard is Nintendo...'
     ],
-    image: consoleImg   // ✅ FIXED
+    image: consoleImg  
   },
   {
     name: 'top-10-indie-games',
@@ -32,7 +32,7 @@ const articles = [
       'While AAA studios were busy...',
       'Our number one pick this year...'
     ],
-    image: retroImg   // ✅ FIXED
+    image: retroImg   
   },
   {
     name: 'understanding-ranked-meta',
@@ -42,7 +42,7 @@ const articles = [
       'The recent nerfs to mobility...',
       'If you are playing solo queue...'
     ],
-    image: esportsImg   // ✅ FIXED
+    image: esportsImg   
   }
 ];
 
