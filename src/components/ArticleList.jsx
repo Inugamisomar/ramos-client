@@ -1,36 +1,51 @@
-import { Link } from 'react-router-dom';
-import Button from './Button';
+import { Link } from "react-router-dom";
 
 const ArticleList = ({ articles }) => {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 auto-rows-fr">
       {articles.map((article, index) => (
-        <article 
-          key={article.name} 
-          // 1. ADDED: flex, flex-col, and h-full to make the card a full-height column
-          className="flex h-full flex-col rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4"
+        <div
+          key={article.name}
+          className="flex flex-col h-full rounded-3xl bg-[#0b2a30] border border-teal-900/30 p-4 shadow-[0_0_20px_rgba(20,184,166,0.15)] hover:shadow-[0_0_25px_rgba(20,184,166,0.3)] transition"
         >
-          <div className="flex aspect-4/3 items-center justify-center overflow-hidden rounded-[1.25rem] bg-zinc-200">
-             <img 
-              src={article.image} 
+          {/* IMAGE */}
+          <div className="overflow-hidden rounded-xl bg-[#081f24]">
+            <img
+              src={article.image}
               alt={article.title}
-              className="h-full w-full object-cover"
+              className="w-full h-40 object-cover hover:scale-105 transition duration-500"
             />
           </div>
-          <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
-            Article {String(index + 1).padStart(2, '0')}
-          </p>
-          <h3 className="mt-2 text-lg font-semibold text-zinc-900">{article.title}</h3>
 
-          <p className="mt-3 text-sm leading-6 text-zinc-600">
-            {article.content[0].substring(0, 150)}...
-          </p>
-          
-          {/* 2. ADDED: mt-auto to the Link wrapper to push it to the bottom */}
-          <Link to={`/articles/${article.name}`} className="mt-auto pt-4">
-            <Button className="w-full">Read More</Button>
-          </Link>
-        </article>
+          {/* CONTENT WRAPPER */}
+          <div className="flex flex-col flex-grow">
+
+            {/* META */}
+            <p className="mt-4 text-xs tracking-widest text-teal-400 uppercase">
+              ARTICLE {String(index + 1).padStart(2, "0")}
+            </p>
+
+            {/* TITLE */}
+            <h3 className="mt-2 text-lg font-bold text-white">
+              {article.title}
+            </h3>
+
+            {/* DESCRIPTION */}
+            <p className="mt-2 text-sm text-zinc-400">
+              {article.content[0].substring(0, 60)}...
+            </p>
+
+            {/* BUTTON (FORCED TO BOTTOM) */}
+            <div className="mt-auto">
+              <Link to={`/articles/${article.name}`}>
+                <button className="mt-4 w-full rounded-full bg-teal-400 text-black py-2 text-xs font-bold tracking-widest hover:bg-teal-300 transition">
+                  READ MORE
+                </button>
+              </Link>
+            </div>
+
+          </div>
+        </div>
       ))}
     </div>
   );

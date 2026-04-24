@@ -13,8 +13,8 @@ const ArticlePage = () => {
   if (!article) {
     return (
       <div className="flex flex-col items-center justify-center py-32 text-center">
-        <h1 className="text-4xl font-bold text-zinc-900">Article not found</h1>
-        <p className="mt-4 text-zinc-600">The article you are looking for doesn't exist.</p>
+        <h1 className="text-4xl !text-white font-bold text-zinc-900">Article not found</h1>
+        <p className="mt-4 text-teal-600">The article you are looking for doesn't exist.</p>
         <Button to="/articles" className="mt-8">Back to Articles</Button>
       </div>
     );
@@ -25,7 +25,7 @@ const ArticlePage = () => {
       {/* Back Link */}
       <Link 
         to="/articles" 
-        className="mb-8 inline-block text-xs font-bold uppercase tracking-widest text-zinc-500 transition-colors hover:text-zinc-900"
+        className="mb-8 inline-block text-xs font-bold uppercase tracking-widest text-white transition-colors hover:text-zinc-900"
       >
         &larr; Back to Articles
       </Link>
@@ -40,12 +40,12 @@ const ArticlePage = () => {
       </div>
 
       {/* Title */}
-      <h1 className="mb-8 text-4xl font-bold leading-tight text-zinc-900 md:text-5xl lg:text-6xl">
+      <h1 className="mb-8 text-4xl font-bold leading-tight !text-white md:text-5xl lg:text-6xl">
         {article.title}
       </h1>
 
       {/* Content */}
-      <div className="prose prose-lg prose-zinc max-w-none text-zinc-700">
+      <div className="prose prose-lg prose-zinc max-w-none text-white">
         {article.content.map((paragraph, index) => (
           <p key={index} className="mb-6 leading-relaxed">
             {paragraph}
