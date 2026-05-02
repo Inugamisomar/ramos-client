@@ -10,8 +10,10 @@ import Layout from "./components/LayoutPage";
 import SignInPage from "./pages/AuthPages/SignInPage";
 import SignUpPage from "./pages/AuthPages/SignUpPage";
 import LayoutPage from "./components/LayoutPage";
-
-
+import DashLayout from "./layouts/DashLayout";
+import DashboardPage from "./pages/DashboardPages/DashboardPage";
+import ReportsPage from "./pages/DashboardPages/ReportsPage";
+import UsersPage from "./pages/DashboardPages/UsersPage";
 const routes = [
   {
     path: "/",
@@ -31,6 +33,18 @@ const routes = [
     children: [
       { path: "signin", element: <SignInPage /> },
       { path: "signup", element: <SignUpPage /> },
+    ],
+  },
+
+  // ✅ ADDED DASHBOARD ROUTES (based on your lab)
+  {
+    path: "/dashboard",
+    element: <DashLayout />,
+    errorElement: <NotFoundPage />,
+    children: [
+      { path: "", element: <DashboardPage /> },
+      { path: "reports", element: <ReportsPage /> },
+      { path: "users", element: <UsersPage /> },
     ],
   },
 ];
