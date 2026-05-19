@@ -30,12 +30,10 @@ const columns = [
   {
     field: "fullName",
     headerName: "Full name",
-    description:
-      "This column has a value getter and is not sortable.",
+    description: "This column has a value getter and is not sortable.",
     sortable: false,
     width: 160,
-    valueGetter: (value, row) =>
-      `${row.firstName || ""} ${row.lastName || ""}`,
+    valueGetter: (value, row) => `${row.firstName || ""} ${row.lastName || ""}`,
   },
 ];
 
@@ -63,7 +61,7 @@ const ReportsPage = () => {
     if (!printWindow) return;
 
     const headMarkup = Array.from(
-      document.querySelectorAll("style, link[rel='stylesheet']")
+      document.querySelectorAll("style, link[rel='stylesheet']"),
     )
       .map((node) => node.outerHTML)
       .join("");
@@ -79,7 +77,7 @@ const ReportsPage = () => {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Print Report</title>
+<title>Print Report </title>
 ${headMarkup}
 <style>
 @page { size: A4; margin: 16mm; }
@@ -87,7 +85,7 @@ ${headMarkup}
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
-  background: #fff;
+  background: #ffffff;
   color: #1f2937;
 }
 .report-shell { padding: 28px; }
@@ -149,11 +147,19 @@ ${printContent.outerHTML}
         sx={{ mb: 4 }}
       >
         <Box>
-          <Typography variant="h4" gutterBottom>
+          <Typography
+            variant="h4"
+            gutterBottom
+            sx={{
+              color: "#14b8a6",
+              fontWeight: 700,
+            }}
+          >
             Reports
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Report analytics overview showing generated reports, category breakdown, and current completion performance.
+            Report analytics overview showing generated reports, category
+            breakdown, and current completion performance.
           </Typography>
         </Box>
 
@@ -173,7 +179,8 @@ ${printContent.outerHTML}
               Monthly Report Output
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              This chart compares how many reports were generated and how many were completed across the last four months.
+              This chart compares how many reports were generated and how many
+              were completed across the last four months.
             </Typography>
 
             <BarChart
@@ -200,7 +207,8 @@ ${printContent.outerHTML}
                 Report Category Share
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                This chart shows the distribution of report requests by category for the current reporting period.
+                This chart shows the distribution of report requests by category
+                for the current reporting period.
               </Typography>
 
               <Box sx={{ display: "flex", justifyContent: "center" }}>
@@ -228,7 +236,8 @@ ${printContent.outerHTML}
                 Completion Rate
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                The gauge highlights the current percentage of reports completed on time based on the latest reporting cycle.
+                The gauge highlights the current percentage of reports completed
+                on time based on the latest reporting cycle.
               </Typography>
 
               <Box

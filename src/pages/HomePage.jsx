@@ -43,7 +43,7 @@ const HomePage = () => {
       <section className="border-y border-teal-500/20 bg-transparent px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         
         <div className="mb-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-teal-400">
+          <p className="text-[21px] font-semibold uppercase tracking-[0.28em] text-teal-400">
             Our Stats
           </p>
 
@@ -65,7 +65,7 @@ const HomePage = () => {
             >
               <p className="text-2xl font-bold text-white">{stat.num}</p>
 
-              <p className="mt-2 text-[11px] uppercase tracking-[0.24em] text-zinc-400">
+              <p className="mt-2 text-[21px] uppercase tracking-[0.24em] text-teal-400">
                 {stat.label}
               </p>
             </div>
@@ -78,11 +78,11 @@ const HomePage = () => {
       <section className="border-y border-teal-500/20 bg-transparent px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 
         <div className="mb-6">
-          <p className="text-[11px] uppercase tracking-[0.28em] text-teal-400">
+          <p className="text-[21px] uppercase tracking-[0.28em] text-teal-400">
             Content Hub
           </p>
 
-          <h2 className="mt-2 text-2xl font-semibold text-white">
+          <h2 className="mt-2 text-2xl font-semibold !text-white">
             What We Cover
           </h2>
         </div>
@@ -107,7 +107,7 @@ const HomePage = () => {
   ].map((item, i) => (
     <div
       key={i}
-      className="rounded-3xl bg-[#0b2a30] border border-teal-900/30 p-5 
+      className="rounded-5xl bg-[#0b2a30] border border-teal-900/30 p-5 
       shadow-[0_0_20px_rgba(20,184,166,0.15)]"
     >
       {/* IMAGE */}
@@ -130,13 +130,13 @@ const HomePage = () => {
       </p>
 
       {/* BUTTON */}
-      <button
-        className="mt-5 w-full rounded-full 
-        bg-gradient-to-r from-teal-400 to-cyan-400 
-        text-black font-bold text-xs tracking-widest py-2"
-      >
-        EXPLORE
-      </button>
+      <Button
+  to="/articles"
+  variant="primary"
+  className="mt-5 w-full"
+>
+  Explore
+</Button>
     </div>
   ))}
 </div>

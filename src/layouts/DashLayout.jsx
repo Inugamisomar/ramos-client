@@ -47,6 +47,14 @@ const dashboardNavItems = [
     to: "/dashboard/users",
     icon: PeopleIcon,
   },
+
+  // ADD THIS
+  {
+    label: "Articles",
+    title: "Articles",
+    to: "/dashboard/articles",
+    icon: ArticleIcon,
+  },
 ];
 
 const openedMixin = (theme) => ({
@@ -174,7 +182,13 @@ const DashLayout = () => {
 
   return (
     <>
-      <Box sx={{ display: "flex" }}>
+      <Box
+        sx={{
+          display: "flex",
+          minHeight: "100vh",
+          background: "linear-gradient(to right, #03191d, #07252c, #12343f)",
+        }}
+      >
         <CssBaseline />
 
         <AppBar position="fixed">
@@ -237,7 +251,17 @@ const DashLayout = () => {
           </List>
         </Drawer>
 
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            minHeight: "100vh",
+            width: "100%",
+            overflowX: "auto",
+            background: "linear-gradient(to right, #03191d, #07252c, #12343f)",
+          }}
+        >
           <DrawerHeader />
           <Outlet />
         </Box>

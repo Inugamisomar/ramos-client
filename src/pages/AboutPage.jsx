@@ -79,7 +79,7 @@ const AboutPage = () => {
             >
               <p className="text-2xl font-bold">{item.val}</p>
 
-              <p className="mt-2 text-[11px] uppercase tracking-[0.24em] text-zinc-400">
+              <p className="mt-2 text-[21px] uppercase tracking-[0.24em] text-teal-400">
                 {item.label}
               </p>
             </div>

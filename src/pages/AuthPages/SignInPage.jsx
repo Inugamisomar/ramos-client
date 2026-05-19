@@ -1,4 +1,6 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import {login,} from "../../services/login";
 import Button from "../../components/Button";
 
 const inputClasses =
@@ -8,6 +10,44 @@ const actionButtonClassName =
   "w-full rounded-lg py-3 text-sm font-bold tracking-widest bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-black ";
 
 const SignInPage = () => {
+
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data =await login(formData);
+
+      alert(data.message);
+
+      // ADMIN
+      if (data.user.role === "admin") {
+        navigate("/dashboard/users");
+      }
+
+      // EDITOR
+      else if (data.user.role === "editor") {
+        navigate("/dashboard/articles");
+      }
+
+    } catch (error) {
+      alert(error.response.data.message);
+    }
+  };
+
   return (
     <>
       {/* Title */}
@@ -15,23 +55,27 @@ const SignInPage = () => {
         <h1 className="text-3xl font-bold !text-white">PLAYER LOGIN</h1>
 
         <p className="mt-2 text-sm text-white-400">
-           Level up your access. Enter the system.
+          Level up your access. Enter the system.
         </p>
       </div>
 
       {/* Card */}
       <div className="mt-8 rounded-2xl border border-cyan-400/20 bg-zinc-900/80 backdrop-blur p-6 shadow-xl shadow-cyan-500/10">
-        <form className="space-y-6">
+
+        <form className="space-y-6" onSubmit={handleSubmit}>
 
           {/* Email */}
           <div>
             <label className="text-xs uppercase tracking-widest text-cyan-300">
-              Email
+              username
             </label>
+
             <input
-              type="email"
-              placeholder="player@email.com"
+              type="username"
+              name="username"
+              placeholder="username"
               className={inputClasses}
+              onChange={handleChange}
             />
           </div>
 
@@ -40,10 +84,13 @@ const SignInPage = () => {
             <label className="text-xs uppercase tracking-widest text-cyan-300">
               Password
             </label>
+
             <input
               type="password"
+              name="password"
               placeholder="••••••••"
               className={inputClasses}
+              onChange={handleChange}
             />
           </div>
 
@@ -53,6 +100,7 @@ const SignInPage = () => {
               <input type="checkbox" className="accent-cyan-400" />
               Remember me
             </label>
+
             <button className="hover:text-cyan-300 transition">
               Forgot?
             </button>
@@ -60,7 +108,7 @@ const SignInPage = () => {
 
           {/* Login Button */}
           <Button type="submit" className={actionButtonClassName}>
-           LOGIN
+            LOGIN
           </Button>
 
           {/* Divider */}
@@ -68,10 +116,17 @@ const SignInPage = () => {
 
           {/* Social */}
           <div className="grid grid-cols-2 gap-3">
-            <Button type="button" className="bg-teal-400 text-white border border-cyan-400/20 hover:bg-blue-400">
+            <Button
+              type="button"
+              className="bg-teal-400 text-white border border-cyan-400/20 hover:bg-blue-400"
+            >
               Google
             </Button>
-            <Button type="button" className="bg-teal-400 text-white border border-teal-400/20 hover:bg-blue-400">
+
+            <Button
+              type="button"
+              className="bg-teal-400 text-white border border-teal-400/20 hover:bg-blue-400"
+            >
               Apple
             </Button>
           </div>
@@ -81,6 +136,7 @@ const SignInPage = () => {
       {/* Footer */}
       <div className="mt-8 text-center text-sm text-zinc-400">
         No account yet?{" "}
+
         <Link
           to="/auth/signup"
           className="text-cyan-300 hover:text-cyan-200 font-semibold"

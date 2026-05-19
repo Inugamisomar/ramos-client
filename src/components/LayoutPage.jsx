@@ -1,19 +1,19 @@
-import { Outlet } from 'react-router-dom';
-import NavBar from './NavBar';
+import { Outlet } from "react-router-dom";
+import NavBar from "./NavBar";
 import Footer from "./Footer";
 
-const LayoutPage = () => {
+export default function LayoutPage() {
   return (
-    <div className="flex w-full flex-col gap-6 bg-gradient-to-br from-[#071e22] via-[#0b2a30] to-[#071e22] text-white min-h-screen">
+    <div className="min-h-screen bg-[#02161b] text-white">
+
       <NavBar />
-      
-      <main className="mx-auto max-w-7xl pt-24">
+
+      <main className="w-full">
         <Outlet />
       </main>
 
-      <Footer />  
+      <Footer />
+
     </div>
   );
-};
-
-export default LayoutPage;
+}

@@ -1,9 +1,63 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import UserService from "../../services/UserService";
 
 const inputClasses =
   "mt-2 w-full rounded-lg border border-teal-600 bg-[#061a1d] px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-500 focus:border-teal-400 focus:ring-1 focus:ring-teal-400";
 
 const SignUpPage = () => {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    age: "",
+    gender: "Male",
+    role: "viewer",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      return alert("Passwords do not match");
+    }
+
+    console.log("FORM DATA:", formData);
+
+    try {
+      const data = await UserService.register({
+        ...formData,
+        age: Number(formData.age),
+      });
+
+      console.log("REGISTERED:", data);
+
+      alert("Account created successfully!");
+
+      navigate("/auth/signin");
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        error?.response?.data?.message ||
+          error.message ||
+          "Something went wrong",
+      );
+    }
+  };
+
   return (
     <>
       {/* TITLE */}
@@ -16,50 +70,91 @@ const SignUpPage = () => {
       </div>
 
       {/* FORM */}
-      <form className="mt-8 space-y-5">
+      <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
         {/* NAME */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-sm text-teal-400">First Name</label>
+
             <input
               type="text"
-              placeholder=""
+              name="firstName"
+              value={formData.firstName}
               required
               className={inputClasses}
+              onChange={handleChange}
             />
           </div>
 
           <div>
             <label className="text-sm text-teal-400">Last Name</label>
+
             <input
               type="text"
-              placeholder=""
+              name="lastName"
+              value={formData.lastName}
               required
               className={inputClasses}
+              onChange={handleChange}
             />
           </div>
+        </div>
+
+        {/* USERNAME */}
+        <div>
+          <label className="text-sm text-teal-400">Username</label>
+
+          <input
+            type="text"
+            name="username"
+            value={formData.username}
+            required
+            className={inputClasses}
+            onChange={handleChange}
+          />
+        </div>
+
+        {/* AGE */}
+        <div>
+          <label className="text-sm text-teal-400">Age</label>
+
+          <input
+            type="number"
+            name="age"
+            value={formData.age}
+            required
+            className={inputClasses}
+            onChange={handleChange}
+          />
         </div>
 
         {/* EMAIL */}
         <div>
           <label className="text-sm text-teal-400">Email</label>
+
           <input
             type="email"
-            placeholder=""
+            name="email"
+            value={formData.email}
             required
             className={inputClasses}
+            onChange={handleChange}
           />
         </div>
 
         {/* PASSWORD */}
         <div>
           <label className="text-sm text-teal-400">Password</label>
+
           <input
             type="password"
-            placeholder=""
+            name="password"
+            value={formData.password}
             required
             className={inputClasses}
+            onChange={handleChange}
           />
+
           <p className="mt-2 text-xs text-white">
             Minimum 8 characters with letters, numbers, and symbols.
           </p>
@@ -68,18 +163,55 @@ const SignUpPage = () => {
         {/* CONFIRM PASSWORD */}
         <div>
           <label className="text-sm text-teal-400">Confirm Password</label>
+
           <input
             type="password"
-            placeholder=""
+            name="confirmPassword"
+            value={formData.confirmPassword}
             required
             className={inputClasses}
+            onChange={handleChange}
           />
+        </div>
+
+        {/* GENDER */}
+        <div>
+          <label className="text-sm text-teal-400">Gender</label>
+
+          <select
+            name="gender"
+            value={formData.gender}
+            required
+            className={inputClasses}
+            onChange={handleChange}
+          >
+            <option value="Male">Male</option>
+
+            <option value="Female">Female</option>
+          </select>
+        </div>
+
+        {/* ROLE */}
+        <div>
+          <label className="text-sm text-teal-400">Role</label>
+
+          <select
+            name="role"
+            value={formData.role}
+            className={inputClasses}
+            onChange={handleChange}
+          >
+            <option value="viewer">Viewer</option>
+
+            <option value="editor">Editor</option>
+
+          </select>
         </div>
 
         {/* BUTTON */}
         <button
           type="submit"
-          className="w-full rounded-lg py-3 bg-gradient-to-r from-teal-400 to-cyan-400 text-black font-bold tracking-widest hover:opacity-90 transition"
+          className="w-full rounded-lg bg-gradient-to-r from-teal-400 to-cyan-400 py-3 font-bold tracking-widest text-black transition hover:opacity-90"
         >
           CREATE ACCOUNT
         </button>
@@ -90,14 +222,14 @@ const SignUpPage = () => {
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
-            className="rounded-lg py-3 bg-teal-400 text-black font-bold hover:bg-zinc-700 transition"
+            className="rounded-lg bg-teal-400 py-3 font-bold text-black transition hover:bg-zinc-700"
           >
             GOOGLE
           </button>
 
           <button
             type="button"
-            className="rounded-lg py-3 bg-teal-400 text-black font-bold hover:bg-zinc-700 transition"
+            className="rounded-lg bg-teal-400 py-3 font-bold text-black transition hover:bg-zinc-700"
           >
             APPLE
           </button>
@@ -105,9 +237,9 @@ const SignUpPage = () => {
       </form>
 
       {/* LINK */}
-      <p className="mt-6 text-sm text-white text-center">
+      <p className="mt-6 text-center text-sm text-white">
         Already have an account?{" "}
-        <Link to="/auth/signin" className="text-teal-400 font-semibold">
+        <Link to="/auth/signin" className="font-semibold text-teal-400">
           Log in
         </Link>
       </p>

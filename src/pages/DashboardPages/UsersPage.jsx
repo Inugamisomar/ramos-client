@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
   Box,
   Button,
@@ -17,19 +19,21 @@ import {
 } from "@mui/material";
 
 import { DataGrid } from "@mui/x-data-grid";
-import usersSeed from "../../data/user.json?raw";
+
+import UserService from "../../services/UserService";
 
 const roles = ["admin", "editor", "viewer"];
-const genders = ["male", "female", "other"];
+
+const genders = ["Male", "Female"];
 
 const blankForm = {
   firstName: "",
   lastName: "",
   age: "",
-  gender: "",
+  gender: "Male",
   contactNumber: "",
   email: "",
-  role: "editor",
+  role: "viewer",
   username: "",
   password: "",
   address: "",
@@ -39,43 +43,48 @@ const blankForm = {
 const labelize = (value) =>
   value ? value.charAt(0).toUpperCase() + value.slice(1) : "";
 
-const loadUsers = () => {
-  try {
-    return {
-      users: JSON.parse(usersSeed).map((u, i) => ({
-        id: i + 1,
-        ...u,
-      })),
-      error: "",
-    };
-  } catch {
-    return { users: [], error: "Failed to load users" };
-  }
-};
-
-const seed = loadUsers();
-
 export default function UsersPage() {
-  const [users, setUsers] = useState(seed.users);
-  const [modal, setModal] = useState({ open: false, id: null });
+  const [users, setUsers] = useState([]);
+
+  const [modal, setModal] = useState({
+    open: false,
+    id: null,
+  });
+
   const [form, setForm] = useState(blankForm);
+
   const [errors, setErrors] = useState({});
 
-  // 🔍 SEARCH + FILTER STATES
+  // SEARCH + FILTER
   const [search, setSearch] = useState("");
+
   const [roleFilter, setRoleFilter] = useState("");
+
   const [genderFilter, setGenderFilter] = useState("");
+
   const [statusFilter, setStatusFilter] = useState("");
 
-  // 🔍 FILTER LOGIC
+  // FETCH USERS
+
+  const fetchUsers = async () => {
+    try {
+      const data = await UserService.getUsers();
+
+      setUsers(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // FILTER USERS
   const filteredUsers = users.filter((user) => {
     const text = search.toLowerCase();
 
     return (
-      (user.firstName.toLowerCase().includes(text) ||
-        user.lastName.toLowerCase().includes(text) ||
-        user.email.toLowerCase().includes(text) ||
-        user.username.toLowerCase().includes(text)) &&
+      (user.firstName?.toLowerCase().includes(text) ||
+        user.lastName?.toLowerCase().includes(text) ||
+        user.email?.toLowerCase().includes(text) ||
+        user.username?.toLowerCase().includes(text)) &&
       (!roleFilter || user.role === roleFilter) &&
       (!genderFilter || user.gender === genderFilter) &&
       (statusFilter === ""
@@ -86,98 +95,245 @@ export default function UsersPage() {
     );
   });
 
+  const handleDeleteUser = async (id) => {
+    const confirmDelete = window.confirm("Delete this user?");
+
+    if (!confirmDelete) return;
+
+    try {
+      await UserService.deleteUser(id);
+
+      fetchUsers();
+
+      closeModal();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const navigate = useNavigate();
+  useEffect(() => {
+    const userInfo =
+  JSON.parse(
+    localStorage.getItem(
+      "user"
+    )
+  );
+
+    // NOT LOGGED IN
+    if (!userInfo) {
+      navigate("/auth/signin");
+
+      return;
+    }
+
+    // VIEWER CANNOT LOGIN
+    if (userInfo?.role === "viewer") {
+      navigate("/auth/signin");
+
+      return;
+    }
+
+    // EDITOR CANNOT ACCESS USERS PAGE
+   if (userInfo?.role === "editor") {
+      alert("Editors cannot access Users Page");
+
+      navigate("/dashboard");
+
+      return;
+    }
+
+    fetchUsers();
+  }, []);
+
+  // VALIDATION
   const validate = () => {
     const e = {};
 
     if (!form.firstName) e.firstName = "Required";
+
     if (!form.lastName) e.lastName = "Required";
 
     if (!form.age) e.age = "Required";
-    else if (!/^\d+$/.test(form.age)) e.age = "Numbers only";
-
-    if (!form.contactNumber) e.contactNumber = "Required";
-    else if (!/^\d{11}$/.test(form.contactNumber))
-      e.contactNumber = "Must be 11 digits";
 
     if (!form.email) e.email = "Required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      e.email = "Invalid email";
 
     if (!form.username) e.username = "Required";
-    else if (/\s/.test(form.username)) e.username = "No spaces allowed";
 
-    if (!form.password) e.password = "Required";
-    else if (form.password.length < 8) e.password = "Minimum 8 characters";
-
-    if (!form.address) e.address = "Required";
+    if (!modal.id && !form.password) {
+      e.password = "Required";
+    }
 
     return e;
   };
 
+  // OPEN MODAL
   const openModal = (user) => {
-    setModal({ open: true, id: user?.id ?? null });
-    setForm(user || blankForm);
+    setModal({
+      open: true,
+      id: user?._id || null,
+    });
+
+    setForm(
+      user
+        ? {
+            ...user,
+            password: "",
+          }
+        : blankForm,
+    );
   };
 
+  // CLOSE MODAL
   const closeModal = () => {
-    setModal({ open: false, id: null });
+    setModal({
+      open: false,
+      id: null,
+    });
+
     setForm(blankForm);
+
     setErrors({});
   };
 
-  const handleSubmit = (e) => {
+  // SAVE / UPDATE USER
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     const validation = validate();
 
     if (Object.keys(validation).length) {
       setErrors(validation);
+
       return;
     }
 
-    if (modal.id) {
-      setUsers((prev) =>
-        prev.map((u) => (u.id === modal.id ? { ...form, id: modal.id } : u)),
-      );
-    } else {
-      setUsers((prev) => [...prev, { ...form, id: prev.length + 1 }]);
+    try {
+      if (modal.id) {
+        await UserService.updateUser(modal.id, {
+          ...form,
+          age: Number(form.age),
+        });
+      } else {
+        await UserService.createUser({
+          ...form,
+          age: Number(form.age),
+        });
+      }
+
+      fetchUsers();
+
+      closeModal();
+    } catch (error) {
+      console.log(error);
     }
-
-    closeModal();
   };
 
-  const toggleStatus = (id) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, isActive: !u.isActive } : u)),
-    );
+  // TOGGLE STATUS
+  const toggleStatus = async (id) => {
+    try {
+      const updatedUser = await UserService.toggleUserStatus(id);
+
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => (user._id === id ? updatedUser : user)),
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
 
+  // TABLE COLUMNS
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
+    {
+      field: "idNumber",
+      headerName: "ID",
+      width: 100,
+      headerAlign: "center",
+      align: "center",
+
+      renderCell: (params) => {
+        return params.api.getRowIndexRelativeToVisibleRows(params.id) + 1;
+      },
+    },
+
+    {
+      field: "firstName",
+      headerName: "First Name",
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+
+      valueGetter: (_, row) => `${row.firstName}`,
+    },
+
+    {
+      field: "lastName",
+      headerName: "Last Name",
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+
+      valueGetter: (_, row) => `${row.lastName}`,
+    },
+
     {
       field: "fullName",
       headerName: "Full Name",
       flex: 1,
+      headerAlign: "center",
+      align: "center",
+
       valueGetter: (_, row) => `${row.firstName} ${row.lastName}`,
     },
-    { field: "username", headerName: "Username", width: 150 },
-    { field: "age", headerName: "Age", width: 80 },
+
+    {
+      field: "username",
+      headerName: "Username",
+      width: 150,
+      headerAlign: "center",
+      align: "center",
+    },
+
+    {
+      field: "age",
+      headerName: "Age",
+      width: 80,
+      headerAlign: "center",
+      align: "center",
+    },
+
     {
       field: "gender",
       headerName: "Gender",
       width: 120,
-      valueGetter: (_, row) => labelize(row.gender),
+      headerAlign: "center",
+      align: "center",
     },
-    { field: "email", headerName: "Email", flex: 1 },
+
+    {
+      field: "email",
+      headerName: "Email",
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+    },
+
     {
       field: "role",
       headerName: "Role",
       width: 120,
+      headerAlign: "center",
+      align: "center",
+
       valueGetter: (_, row) => labelize(row.role),
     },
+
     {
       field: "status",
       headerName: "Status",
       width: 120,
+      headerAlign: "center",
+      align: "center",
+
       renderCell: (params) => (
         <Chip
           label={params.row.isActive ? "Active" : "Inactive"}
@@ -186,16 +342,21 @@ export default function UsersPage() {
         />
       ),
     },
+
     {
       field: "actions",
       headerName: "Actions",
-      width: 200,
+      width: 220,
+      headerAlign: "center",
+      align: "center",
+
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
           <Button size="small" onClick={() => openModal(params.row)}>
             Edit
           </Button>
-          <Button size="small" onClick={() => toggleStatus(params.row.id)}>
+
+          <Button size="small" onClick={() => toggleStatus(params.row._id)}>
             {params.row.isActive ? "Disable" : "Activate"}
           </Button>
         </Stack>
@@ -205,212 +366,318 @@ export default function UsersPage() {
 
   return (
     <Box>
-      <Typography variant="h4">Users</Typography>
+      <Typography variant="h4" className="text-teal-400">
+        Users
+      </Typography>
 
       <Button variant="contained" onClick={() => openModal()}>
         ADD USER
       </Button>
 
-      {/* 🔍 SEARCH + FILTER */}
+      {/* FILTERS */}
       <Stack
-  direction={{ xs: "column", md: "row" }}
-  spacing={2}
-  sx={{ mt: 2 }}
-  alignItems="center"
->
-  {/* SEARCH */}
-  <TextField
-    label="Search"
-    variant="outlined"
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-    sx={{ flex: 2 }} // bigger space
-    fullWidth
-  />
+        direction={{
+          xs: "column",
+          md: "row",
+        }}
+        spacing={2}
+        sx={{ mt: 2 }}
+      >
+        <TextField
+          label="Search User"
+          fullWidth
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-  {/* ROLE */}
-  <TextField
-    select
-    label="Role"
-    value={roleFilter}
-    onChange={(e) => setRoleFilter(e.target.value)}
-    sx={{ minWidth: 140 }}
-  >
-    <MenuItem value="">All</MenuItem>
-    {roles.map((r) => (
-      <MenuItem key={r} value={r}>
-        {labelize(r)}
-      </MenuItem>
-    ))}
-  </TextField>
+        <TextField
+          select
+          label="Role"
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+          sx={{
+            minWidth: 140,
+          }}
+        >
+          <MenuItem value="">All</MenuItem>
 
-  {/* GENDER */}
-  <TextField
-    select
-    label="Gender"
-    value={genderFilter}
-    onChange={(e) => setGenderFilter(e.target.value)}
-    sx={{ minWidth: 140 }}
-  >
-    <MenuItem value="">All</MenuItem>
-    {genders.map((g) => (
-      <MenuItem key={g} value={g}>
-        {labelize(g)}
-      </MenuItem>
-    ))}
-  </TextField>
+          {roles.map((r) => (
+            <MenuItem key={r} value={r}>
+              {labelize(r)}
+            </MenuItem>
+          ))}
+        </TextField>
 
-  {/* STATUS */}
-  <TextField
-    select
-    label="Status"
-    value={statusFilter}
-    onChange={(e) => setStatusFilter(e.target.value)}
-    sx={{ minWidth: 140 }}
-  >
-    <MenuItem value="">All</MenuItem>
-    <MenuItem value="active">Active</MenuItem>
-    <MenuItem value="inactive">Inactive</MenuItem>
-  </TextField>
-</Stack>
+        <TextField
+          select
+          label="Gender"
+          value={genderFilter}
+          onChange={(e) => setGenderFilter(e.target.value)}
+          sx={{
+            minWidth: 140,
+          }}
+        >
+          <MenuItem value="">All</MenuItem>
 
+          {genders.map((g) => (
+            <MenuItem key={g} value={g}>
+              {g}
+            </MenuItem>
+          ))}
+        </TextField>
+
+        <TextField
+          select
+          label="Status"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          sx={{
+            minWidth: 140,
+          }}
+        >
+          <MenuItem value="">All</MenuItem>
+
+          <MenuItem value="active">Active</MenuItem>
+
+          <MenuItem value="inactive">Inactive</MenuItem>
+        </TextField>
+      </Stack>
+
+      {/* TABLE */}
       <Paper sx={{ mt: 2 }}>
-        <DataGrid rows={filteredUsers} columns={columns} autoHeight />
+        <DataGrid
+          rows={filteredUsers}
+          columns={columns}
+          autoHeight
+          getRowId={(row) => row._id}
+          sx={{
+            border: "1px solid #1f4d57",
+
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: "#111827 !important",
+              color: "#ffffff",
+              borderBottom: "1px solid #1f4d57",
+            },
+
+            "& .MuiDataGrid-columnHeader": {
+              backgroundColor: "#111827 !important",
+            },
+
+            "& .MuiDataGrid-cell": {
+              color: "#e5e7eb",
+              borderBottom: "1px solid #1f4d57",
+              fontSize: "15px",
+            },
+
+            "& .MuiDataGrid-row": {
+              backgroundColor: "#14343b",
+            },
+
+            "& .MuiDataGrid-row:hover": {
+              backgroundColor: "#1b4b54",
+            },
+
+            "& .MuiDataGrid-footerContainer": {
+              backgroundColor: "#111827",
+              color: "#ffffff",
+              borderTop: "1px solid #1f4d57",
+            },
+
+            "& .MuiTablePagination-root": {
+              color: "#ffffff",
+            },
+
+            "& .MuiSvgIcon-root": {
+              color: "#ffffff",
+            },
+          }}
+        />
       </Paper>
 
-      {/* MODAL FORM */}
+      {/* MODAL */}
       <Dialog open={modal.open} onClose={closeModal} fullWidth maxWidth="md">
-        <DialogTitle sx={{ color: "#e6fefe" }}>➕ Add User</DialogTitle>
-
+        <DialogTitle
+          sx={{
+            color: "#00e5d0",
+            fontWeight: "bold",
+            fontSize: "30px",
+          }}
+        >
+          {modal.id ? "Edit User" : "Add User"}
+        </DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent>
             <Stack spacing={3}>
-              <Typography variant="subtitle2">Personal Information</Typography>
+              <Typography>Personal Information</Typography>
 
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <Stack
+                direction={{
+                  xs: "column",
+                  sm: "row",
+                }}
+                spacing={2}
+              >
                 <TextField
                   label="First Name"
+                  required
                   fullWidth
                   value={form.firstName}
-                  error={!!errors.firstName}
-                  helperText={errors.firstName}
                   onChange={(e) =>
-                    setForm({ ...form, firstName: e.target.value })
+                    setForm({
+                      ...form,
+                      firstName: e.target.value,
+                      
+                    })
                   }
                 />
+
                 <TextField
                   label="Last Name"
+                  required
                   fullWidth
                   value={form.lastName}
-                  error={!!errors.lastName}
-                  helperText={errors.lastName}
                   onChange={(e) =>
-                    setForm({ ...form, lastName: e.target.value })
+                    setForm({
+                      ...form,
+                      lastName: e.target.value,
+                    })
                   }
                 />
               </Stack>
 
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <Stack
+                direction={{
+                  xs: "column",
+                  sm: "row",
+                }}
+                spacing={2}
+              >
                 <TextField
                   label="Age"
+                  required
                   fullWidth
                   value={form.age}
-                  error={!!errors.age}
-                  helperText={errors.age}
-                  onChange={(e) => setForm({ ...form, age: e.target.value })}
-                />
-                <TextField
-                  label="Contact Number"
-                  fullWidth
-                  value={form.contactNumber}
-                  error={!!errors.contactNumber}
-                  helperText={errors.contactNumber}
                   onChange={(e) =>
-                    setForm({ ...form, contactNumber: e.target.value })
+                    setForm({
+                      ...form,
+                      age: e.target.value,
+                    })
                   }
                 />
-              </Stack>
 
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                 <TextField
                   select
                   label="Gender"
+                  required
                   fullWidth
                   value={form.gender}
-                  onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      gender: e.target.value,
+                    })
+                  }
                 >
                   {genders.map((g) => (
                     <MenuItem key={g} value={g}>
-                      {labelize(g)}
+                      {g}
                     </MenuItem>
                   ))}
                 </TextField>
-                <TextField
-                  label="Email"
-                  fullWidth
-                  value={form.email}
-                  error={!!errors.email}
-                  helperText={errors.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
               </Stack>
 
-              <Typography variant="subtitle2">Account Information</Typography>
+              <TextField
+                label="Email"
+                required
+                fullWidth
+                value={form.email}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    email: e.target.value,
+                  })
+                }
+              />
 
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <Typography>Account Information</Typography>
+
+              <Stack
+                direction={{
+                  xs: "column",
+                  sm: "row",
+                }}
+                spacing={2}
+              >
                 <TextField
                   label="Username"
+                  required
                   fullWidth
                   value={form.username}
-                  error={!!errors.username}
-                  helperText={errors.username}
                   onChange={(e) =>
-                    setForm({ ...form, username: e.target.value })
+                    setForm({
+                      ...form,
+                      username: e.target.value,
+                    })
                   }
                 />
+
                 <TextField
                   label="Password"
                   type="password"
+                  required
                   fullWidth
                   value={form.password}
-                  error={!!errors.password}
-                  helperText={errors.password}
                   onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
+                    setForm({
+                      ...form,
+                      password: e.target.value,
+                    })
                   }
                 />
               </Stack>
 
-                <TextField
-                  select
-                  label="Role"
-                  fullWidth
-                  value={form.role}
-                  onChange={(e) => setForm({ ...form, role: e.target.value })}
-                >
-                  {roles.map((r) => (
-                    <MenuItem key={r} value={r}>
-                      {labelize(r)}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <TextField
-                  label="Address"
-                  rows={2}
-                  fullWidth
-                  value={form.address}
-                  error={!!errors.address}
-                  helperText={errors.address}
-                  onChange={(e) =>
-                    setForm({ ...form, address: e.target.value })
-                  }
-                />
+              <TextField
+                select
+                label=" Role"
+                required
+                fullWidth
+                value={form.role}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    role: e.target.value,
+                  })
+                }
+              >
+                {roles.map((r) => (
+                  <MenuItem key={r} value={r}>
+                    {labelize(r)}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                label="Address"
+                required
+                fullWidth
+                value={form.address}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    address: e.target.value,
+                  })
+                }
+              />
+
               <FormControlLabel
                 control={
                   <Switch
                     checked={form.isActive}
                     onChange={(e) =>
-                      setForm({ ...form, isActive: e.target.checked })
+                      setForm({
+                        ...form,
+                        isActive: e.target.checked,
+                      })
                     }
                   />
                 }
@@ -420,9 +687,16 @@ export default function UsersPage() {
           </DialogContent>
 
           <DialogActions>
+            {modal.id && (
+              <Button color="error" onClick={() => handleDeleteUser(modal.id)}>
+                Delete
+              </Button>
+            )}
+
             <Button onClick={closeModal}>Cancel</Button>
+
             <Button type="submit" variant="contained">
-              {modal.id ? "Update" : "Save"}
+              {modal.id ? "Update" : "Create"}
             </Button>
           </DialogActions>
         </form>
