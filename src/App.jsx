@@ -8,7 +8,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import AuthLayout from "./layouts/AuthLayout";
 import Layout from "./components/LayoutPage";
 import SignInPage from "./pages/AuthPages/SignInPage";
-import SignUpPage from "./pages/AuthPages/SignUpPage";
+import SignupPage from "./pages/AuthPages/SignupPage";
 import LayoutPage from "./components/LayoutPage";
 import DashLayout from "./layouts/DashLayout";
 import DashboardPage from "./pages/DashboardPages/DashboardPage";
@@ -33,7 +33,7 @@ const routes = [
     errorElement: <NotFoundPage />,
     children: [
       { path: "signin", element: <SignInPage /> },
-      { path: "signup", element: <SignUpPage /> },
+      { path: "signup", element: <SignupPage /> },
     ],
   },
 
