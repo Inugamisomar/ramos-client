@@ -54,6 +54,7 @@ export default function UsersPage() {
   const [form, setForm] = useState(blankForm);
 
   const [errors, setErrors] = useState({});
+  const [success, setSuccess] = useState("");
 
   // SEARCH + FILTER
   const [search, setSearch] = useState("");
@@ -94,30 +95,41 @@ export default function UsersPage() {
           : !user.isActive)
     );
   });
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  const handleDeleteUser = async (id) => {
-    const confirmDelete = window.confirm("Delete this user?");
+  const handleDeleteUser = (id) => {
+    setSelectedUser(id);
 
-    if (!confirmDelete) return;
+    setDeleteDialog(true);
+  };
 
+  const confirmDelete = async () => {
     try {
-      await UserService.deleteUser(id);
+      await UserService.deleteUser(selectedUser);
 
       fetchUsers();
 
+      setSuccess(
+        modal.id ? "User updated successfully!" : "User added successfully!",
+      );
+
+      setTimeout(() => {
+        setSuccess("");
+      }, 5000);
+
       closeModal();
+
+      setDeleteDialog(false);
+
+      setSelectedUser(null);
     } catch (error) {
       console.log(error);
     }
   };
   const navigate = useNavigate();
   useEffect(() => {
-    const userInfo =
-  JSON.parse(
-    localStorage.getItem(
-      "user"
-    )
-  );
+    const userInfo = JSON.parse(localStorage.getItem("user"));
 
     // NOT LOGGED IN
     if (!userInfo) {
@@ -134,7 +146,7 @@ export default function UsersPage() {
     }
 
     // EDITOR CANNOT ACCESS USERS PAGE
-   if (userInfo?.role === "editor") {
+    if (userInfo?.role === "editor") {
       alert("Editors cannot access Users Page");
 
       navigate("/dashboard");
@@ -369,6 +381,22 @@ export default function UsersPage() {
       <Typography variant="h4" className="text-teal-400">
         Users
       </Typography>
+      {success && (
+        <Box
+          sx={{
+            mt: 2,
+            mb: 2,
+            p: 2,
+            borderRadius: "12px",
+            backgroundColor: "rgba(16,185,129,0.12)",
+            border: "1px solid #10b981",
+            color: "#6ee7b7",
+            fontWeight: "bold",
+          }}
+        >
+          {success}
+        </Box>
+      )}
 
       <Button variant="contained" onClick={() => openModal()}>
         ADD USER
@@ -493,6 +521,60 @@ export default function UsersPage() {
           }}
         />
       </Paper>
+      {/* DELETE DIALOG */}
+      <Dialog
+        open={deleteDialog}
+        onClose={() => setDeleteDialog(false)}
+        PaperProps={{
+          sx: {
+            backgroundColor: "#061a1d",
+            border: "1px solid #00e5d0",
+            borderRadius: "16px",
+            color: "white",
+            minWidth: 350,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            color: "#00e5d0",
+            fontWeight: "bold",
+          }}
+        >
+          Delete User
+        </DialogTitle>
+
+        <DialogContent>
+          <Typography>Are you sure you want to delete this user?</Typography>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={() => setDeleteDialog(false)}
+            sx={{
+              color: "#9ca3af",
+            }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={confirmDelete}
+            sx={{
+              background: "linear-gradient(to right, #ff4d4f, #dc2626)",
+              color: "white",
+              borderRadius: "10px",
+
+              "&:hover": {
+                background: "linear-gradient(to right, #ff6b6b, #ef4444)",
+              },
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* MODAL */}
       <Dialog open={modal.open} onClose={closeModal} fullWidth maxWidth="md">
@@ -526,7 +608,6 @@ export default function UsersPage() {
                     setForm({
                       ...form,
                       firstName: e.target.value,
-                      
                     })
                   }
                 />

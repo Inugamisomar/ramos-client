@@ -204,11 +204,10 @@ ${printContent.outerHTML}
           <Card sx={{ flex: 1 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Report Category Share
+                Report Analytics
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                This chart shows the distribution of report requests by category
-                for the current reporting period.
+                Report requests by category.
               </Typography>
 
               <Box sx={{ display: "flex", justifyContent: "center" }}>
@@ -216,10 +215,10 @@ ${printContent.outerHTML}
                   series={[
                     {
                       data: [
-                        { id: 0, value: 14, label: "Sales" },
-                        { id: 1, value: 10, label: "Users" },
-                        { id: 2, value: 8, label: "Inventory" },
-                        { id: 3, value: 6, label: "Finance" },
+                        { id: 0, value: 14, label: "Player Reports" },
+                        { id: 1, value: 10, label: "Bug Reports" },
+                        { id: 2, value: 8, label: "Account Issues" },
+                        { id: 3, value: 6, label: "System Logs" },
                       ],
                     },
                   ]}
@@ -233,7 +232,7 @@ ${printContent.outerHTML}
           <Card sx={{ flex: 1 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Completion Rate
+                System Completion
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 The gauge highlights the current percentage of reports completed
@@ -248,7 +247,7 @@ ${printContent.outerHTML}
                   justifyContent: "center",
                 }}
               >
-                <Gauge width={180} height={180} value={78} />
+               <Gauge width={220} height={220} value={78} />
               </Box>
             </CardContent>
           </Card>

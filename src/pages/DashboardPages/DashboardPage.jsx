@@ -51,7 +51,7 @@ function DashboardPage() {
     <Box sx={{ color: "#fff" }}>
       {/* TITLE */}
       <Typography variant="h4" gutterBottom sx={{ color: "#00f5d4" }}>
-        🎮 Dashboard
+         Dashboard
       </Typography>
 
       {/* TOP STATS WITH CENTERED GAUGES */}

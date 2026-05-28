@@ -7,6 +7,8 @@ const inputClasses =
 
 const SignUpPage = () => {
   const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -31,7 +33,9 @@ const SignUpPage = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      return alert("Passwords do not match");
+      setError("Passwords do not match");
+      setSuccess("");
+      return;
     }
 
     console.log("FORM DATA:", formData);
@@ -43,18 +47,24 @@ const SignUpPage = () => {
       });
 
       console.log("REGISTERED:", data);
+      setSuccess("Account created successfully!");
+      setError("");
 
-      alert("Account created successfully!");
+      setTimeout(() => {
+        navigate("/auth/signin");
+      }, 2000);
 
       navigate("/auth/signin");
     } catch (error) {
       console.error(error);
 
-      alert(
+      setError(
         error?.response?.data?.message ||
           error.message ||
           "Something went wrong",
       );
+
+      setSuccess("");
     }
   };
 
@@ -191,24 +201,13 @@ const SignUpPage = () => {
           </select>
         </div>
 
-        {/* ROLE */}
-        <div>
-          <label className="text-sm text-teal-400">Role</label>
-
-          <select
-            name="role"
-            value={formData.role}
-            className={inputClasses}
-            onChange={handleChange}
-          >
-            <option value="viewer">Viewer</option>
-
-            <option value="editor">Editor</option>
-
-          </select>
-        </div>
-
         {/* BUTTON */}
+        {/* ERROR */}
+        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+        {/* SUCCESS */}
+        {success && (
+          <p className="text-green-400 text-sm text-center">{success}</p>
+        )}
         <button
           type="submit"
           className="w-full rounded-lg bg-gradient-to-r from-teal-400 to-cyan-400 py-3 font-bold tracking-widest text-black transition hover:opacity-90"
