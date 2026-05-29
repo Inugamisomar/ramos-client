@@ -4,7 +4,7 @@ import myProfilePic from "../assets/LEO GAMING (1).png";
 import setupPic1 from "../assets/league.jpg";
 import setupPic2 from "../assets/valor.jpg";
 import setupPic3 from "../assets/mlbb.jpg";
-import setupPic4 from "../assets/tekken.png";
+import setupPic4 from "../assets/Tekken.png";
 
 const AboutPage = () => {
   return (
